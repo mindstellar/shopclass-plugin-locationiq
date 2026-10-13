@@ -115,4 +115,14 @@ make($spy)->geocode('addr', 'IN');
 pin('timeouts and size cap are passed', array('connect_timeout' => 3, 'timeout' => 5, 'max_bytes' => 65536), $spy->options[0]);
 
 
+harness_section('no key');
+$spy = new FakeHttp();
+check('geocode without a key throws', thrown(fn () => make($spy, '')->geocode('x', 'IN')) !== null);
+pin('and sends no request', 0, count($spy->urls));
+
+harness_section('region');
+foreach (array('us2', 'ap1', 'EU1', 'us1.evil.com', '', 'us1/../x') as $region) {
+    check("region '$region' gives the us1 host", str_starts_with(make(new FakeHttp(), 'k', $region)->url('x'), 'https://us1.locationiq.com/v1/search?'), $region);
+}
+
 exit(harness_result());

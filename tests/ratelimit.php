@@ -87,10 +87,67 @@ $p->geocode('c');
 pin('third lookup waits', 1, count($slept));
 pin('all three were sent', 3, count($http->urls));
 
+harness_section('default is two a second');
+$clock = 4000.2;
+$slept = array();
+$n     = 0;
+$l     = new RateLimiter(static function (int $second) use (&$n): int {
+    return ++$n <= 3 ? $n : 1;
+}, static fn (): float => $clock, static function (int $m) use (&$clock, &$slept): void {
+    $slept[] = $m;
+    $clock += 1;
+});
+$l->acquire();
+$l->acquire();
+pin('two calls pass at once', 0, count($slept));
+$l->acquire();
+pin('the third in the same second waits', 1, count($slept));
+
 harness_section('core-backed limiter');
 RateLimit::$counts = array();
-RateLimiter::forSite(1)->acquire();
+RateLimit::$calls  = array();
+$GLOBALS['usleeps'] = array();
+RateLimiter::forSite()->acquire();
 pin('counts one call in core\'s counter', 1, count(RateLimit::$counts));
 check('under the locationiq context', str_starts_with(array_key_first(RateLimit::$counts), 'locationiq|'));
+$call = RateLimit::$calls[0];
+pin('context', 'locationiq', $call['context']);
+pin('one-second window', 1, $call['windowSeconds']);
+pin('fails open', true, $call['failOpen']);
+check('counted against the current whole second', is_int($call['now']) && abs($call['now'] - time()) <= 1, (string) $call['now']);
+pin('a free slot does not wait', 0, count($GLOBALS['usleeps']));
+
+harness_section('real wait and retry cap');
+$GLOBALS['usleeps'] = array();
+RateLimit::$calls   = array();
+RateLimit::$force   = static fn (int $second): int => 99;
+RateLimiter::forSite()->acquire();
+pin('a full second makes it wait, three times at most', 3, count($GLOBALS['usleeps']));
+pin('and asks the counter each time', 3, count(RateLimit::$calls));
+check('each wait is up to a second', max($GLOBALS['usleeps']) <= 1001000 && min($GLOBALS['usleeps']) >= 1000, json_encode($GLOBALS['usleeps']));
+$GLOBALS['usleeps'] = array();
+$answers            = array(3, 1);
+RateLimit::$force   = static function (int $second) use (&$answers): int {
+    return array_shift($answers) ?? 1;
+};
+RateLimiter::forSite()->acquire();
+pin('one full second, one wait, then it goes', 1, count($GLOBALS['usleeps']));
+$GLOBALS['usleeps'] = array();
+RateLimit::$force   = static fn (int $second): ?int => null;
+RateLimiter::forSite()->acquire();
+pin('an unreachable counter does not wait', 0, count($GLOBALS['usleeps']));
+
+harness_section('Plugin::provider() uses the site limiter');
+RateLimit::$force   = null;
+RateLimit::$calls   = array();
+$GLOBALS['prefs']['locationiq'] = array('api_key' => 'pk.test', 'region' => 'us1', 'plan' => 'free');
+$provider = mindstellar\locationiq\Plugin::provider();
+$http     = (new FakeHttp())->answer(200, '[{"lat":"1","lon":"2"}]');
+$prop     = new ReflectionProperty($provider, 'http');
+$prop->setAccessible(true);
+$prop->setValue($provider, $http);
+$provider->geocode('a');
+pin('the lookup moved the counter', 1, count(RateLimit::$calls));
+pin('and sent its request', 1, count($http->urls));
 
 exit(harness_result());
