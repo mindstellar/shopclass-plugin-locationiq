@@ -1,0 +1,93 @@
+<?php
+/*
+ * This file is part of the LocationIQ Geocoder plugin for Shopclass.
+ * Copyright (c) 2026 Navjot Tomer (Mindstellar) and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+ * The wiring, against core's real GeocodeProviderRegistry and Geocoder.
+ */
+
+require __DIR__ . '/lib/bootstrap.php';
+
+use mindstellar\location\GeocodeProviderRegistry;
+use mindstellar\location\Geocoder;
+use mindstellar\locationiq\Plugin;
+
+harness_section('registry');
+osc_add_hook(GeocodeProviderRegistry::HOOK, array(Plugin::class, 'register'));
+$GLOBALS['prefs']['locationiq'] = array('api_key' => 'pk.test', 'region' => 'eu1', 'plan' => 'paid');
+$registry = GeocodeProviderRegistry::getInstance();
+$provider = $registry->get('locationiq');
+check('the hook registers the provider', $provider !== null);
+pin('and it is the only one', array('locationiq'), array_keys($registry->all()));
+pin('built from the saved plan', null, $provider->cacheTtl());
+check('built from the saved region', str_contains($provider->url('x'), 'eu1.locationiq.com'));
+
+harness_section('active only when chosen and configured');
+pin('nothing chosen', null, $registry->active());
+$GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = 'locationiq';
+check('chosen and configured', $registry->active() !== null);
+$GLOBALS['prefs']['locationiq']['api_key'] = '';
+Plugin::register($registry);
+pin('chosen without a key', null, $registry->active());
+$GLOBALS['prefs']['locationiq']['api_key'] = 'pk.test';
+
+harness_section('admin notice');
+$GLOBALS['prefs']['locationiq']['api_key'] = '';
+ob_start();
+Plugin::adminNotice();
+$out = ob_get_clean();
+check('warns when chosen with no key', str_contains($out, 'no API key') && str_contains($out, 'flashmessage-warning'));
+$GLOBALS['prefs']['locationiq']['api_key'] = 'pk.test';
+ob_start();
+Plugin::adminNotice();
+pin('quiet with a key', '', ob_get_clean());
+$GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = 'other';
+$GLOBALS['prefs']['locationiq']['api_key'] = '';
+ob_start();
+Plugin::adminNotice();
+pin('quiet when another provider is chosen', '', ob_get_clean());
+
+harness_section('uninstall');
+$GLOBALS['prefs']['locationiq'] = array('api_key' => 'k', 'region' => 'us1', 'plan' => 'free');
+$GLOBALS['kv']['locationiq']    = array('rate:1' => 1);
+Plugin::uninstall();
+pin('settings removed', array(), $GLOBALS['prefs']['locationiq']);
+check('counters removed', !isset($GLOBALS['kv']['locationiq']));
+
+harness_section('settings page declaration');
+$spec = require __DIR__ . '/../settings.php';
+$names = array();
+foreach ($spec['groups'] as $group) {
+    foreach ($group['fields'] as $field) {
+        $names[$field['name']] = $field;
+    }
+}
+check('has the three settings', isset($names['api_key'], $names['region'], $names['plan']));
+pin('the key is a secret', 'secret', $names['api_key']['type']);
+pin('the key is write-only', true, $names['api_key']['write_only']);
+pin('a blank box keeps the key', null, ($names['api_key']['persist'])('  '));
+pin('a new key is trimmed', 'pk.new', ($names['api_key']['persist'])(' pk.new '));
+check('a key with a space is rejected', ($names['api_key']['validate'])('a b') !== null);
+pin('a normal key passes', null, ($names['api_key']['validate'])('pk.abc_123-X'));
+pin('free is the default plan', 'free', $names['plan']['default']);
+pin('us1 is the default region', 'us1', $names['region']['default']);
+
+harness_section('lookup through core\'s Geocoder');
+$GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = 'locationiq';
+$http     = (new FakeHttp())->answer(200, '[{"lat":"18.5","lon":"73.8"}]');
+$custom   = new mindstellar\locationiq\LocationIqProvider('pk.test', 'us1', 'free', $http);
+if (!function_exists('osc_apply_filter')) {
+    function osc_apply_filter($hook, $value = null, ...$args)
+    {
+        return $value;
+    }
+}
+$geocoder = new Geocoder($custom);
+pin('first lookup hits the service', array(18.5, 73.8), $geocoder->geocode('12 Main St, Pune', 'IN'));
+pin('second lookup comes from the cache', array(18.5, 73.8), $geocoder->geocode('12 Main St, Pune', 'IN'));
+pin('only one request was made', 1, count($http->urls));
+
+exit(harness_result());
