@@ -21,12 +21,18 @@ an address is looked up.
 
 The saved key is never shown again. Leave the box blank to keep it.
 
+## When lookups run
+
+A lookup runs from the job queue after a listing with a street address is saved, not while the
+visitor waits. Cron (or auto-cron) must be running; that is enough on shared hosting, and a
+queue worker makes it faster.
+
 ## Plans
 
 | Plan | Limit | Answers are kept |
 |---|---|---|
 | Free | 2 requests a second | 48 hours, as the free terms require |
-| Paid | per your plan | for good |
+| Paid | per your plan | up to a year |
 
 The plugin waits for the next second when the free limit is reached. A rate limit (HTTP 429), a
 server error or a refused key makes the lookup fail, and Shopclass tries again later. An
@@ -36,6 +42,11 @@ address LocationIQ cannot find is remembered for a day.
 
 The free plan requires a visible link to LocationIQ wherever its data is shown. Print it in
 your theme with `osc_geocode_attribution()`.
+
+## Uninstall
+
+The plugin's settings are removed. If *Address lookup* in Settings → General → Maps named this
+plugin, it is reset to none.
 
 ## Tests
 

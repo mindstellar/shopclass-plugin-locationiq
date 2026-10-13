@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace mindstellar\locationiq;
 
 use mindstellar\location\GeocodeProvider;
-use mindstellar\locationiq\Http\HttpClient;
-use mindstellar\locationiq\Http\HttpException;
+use mindstellar\http\HttpClient;
+use mindstellar\http\HttpException;
 use RuntimeException;
 
 /**
@@ -34,6 +34,9 @@ final class LocationIqProvider implements GeocodeProvider
     public const FREE_TTL = 172800;
 
     public const ATTRIBUTION = '<a href="https://locationiq.com/" rel="noopener">Search by LocationIQ.com</a>';
+
+    /** Short timeouts so a slow service cannot hold up the job, and a cap on the answer. */
+    private const HTTP_OPTIONS = array('connect_timeout' => 3, 'timeout' => 5, 'max_bytes' => 65536);
 
     private string $apiKey;
     private string $region;
@@ -74,15 +77,8 @@ final class LocationIqProvider implements GeocodeProvider
         return self::ATTRIBUTION;
     }
 
-    public function endpoint(): string
-    {
-        return 'https://' . $this->region . '.locationiq.com/v1/search';
-    }
-
-    /**
-     * @return array<string,string|int>
-     */
-    public function params(string $address, ?string $countryCode = null): array
+    /** The request URL, key included. */
+    public function url(string $address, ?string $countryCode = null): string
     {
         $query = array(
             'key'    => $this->apiKey,
@@ -94,13 +90,8 @@ final class LocationIqProvider implements GeocodeProvider
             $query['countrycodes'] = strtolower($countryCode);
         }
 
-        return $query;
-    }
 
-    /** The request URL, key included. For tests; the lookup itself never builds it here. */
-    public function url(string $address, ?string $countryCode = null): string
-    {
-        return $this->endpoint() . '?' . http_build_query($this->params($address, $countryCode), '', '&', PHP_QUERY_RFC3986);
+        return 'https://' . $this->region . '.locationiq.com/v1/search' . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 
     public function geocode(string $address, ?string $countryCode = null): ?array
@@ -112,7 +103,7 @@ final class LocationIqProvider implements GeocodeProvider
         $this->limiter?->acquire();
 
         try {
-            $response = $this->http->get($this->endpoint(), $this->params($address, $countryCode));
+            $response = $this->http->send('GET', $this->url($address, $countryCode), array('Accept' => 'application/json'), null, self::HTTP_OPTIONS);
         } catch (HttpException $e) {
             throw new RuntimeException($this->mask($e->getMessage()));
         }

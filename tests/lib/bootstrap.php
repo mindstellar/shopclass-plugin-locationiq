@@ -28,7 +28,7 @@ if (!defined('ABS_PATH')) {
 }
 
 spl_autoload_register(static function (string $class): void {
-    foreach (array('mindstellar\\location\\' => 'location', 'mindstellar\\base\\' => 'base') as $prefix => $dir) {
+    foreach (array('mindstellar\\location\\' => 'location', 'mindstellar\\base\\' => 'base', 'mindstellar\\http\\' => 'http', 'mindstellar\\search\\' => 'search') as $prefix => $dir) {
         $file = core_path() . '/oc-includes/osclass/classes/' . $dir . '/' . substr($class, strlen($prefix)) . '.php';
         if (strncmp($class, $prefix, strlen($prefix)) === 0 && is_file($file)) {
             require $file;
@@ -54,8 +54,8 @@ if (!function_exists('__')) {
 
 /** In-memory stand-ins for the core functions the plugin calls. */
 $GLOBALS['prefs'] = array();
-$GLOBALS['kv']    = array();
 $GLOBALS['hooks'] = array();
+$GLOBALS['kv']    = array();
 
 function osc_get_preference($name, $section = 'osclass')
 {
@@ -76,13 +76,6 @@ function osc_kv_get(string $group, string $key, $default = null)
 function osc_kv_set(string $group, string $key, $value, ?int $ttl = null): void
 {
     $GLOBALS['kv'][$group][$key] = $value;
-}
-function osc_kv_delete_group(string $group): int
-{
-    $n = count($GLOBALS['kv'][$group] ?? array());
-    unset($GLOBALS['kv'][$group]);
-
-    return $n;
 }
 function osc_add_hook($hook, $callback, $priority = 5)
 {

@@ -50,7 +50,7 @@ return array(
                     'type'    => 'radio',
                     'name'    => 'plan',
                     'label'   => __('Plan', 'locationiq'),
-                    'help'    => __('The free plan allows 2 requests a second and lets answers be stored for 48 hours; after that an address is looked up again. A paid plan lets answers be kept.', 'locationiq'),
+                    'help'    => __('The free plan allows 2 requests a second and lets answers be stored for 48 hours; after that an address is looked up again. A paid plan lets answers be kept, up to a year.', 'locationiq'),
                     'options' => array(
                         LocationIqProvider::PLAN_FREE => __('Free', 'locationiq'),
                         LocationIqProvider::PLAN_PAID => __('Paid', 'locationiq'),

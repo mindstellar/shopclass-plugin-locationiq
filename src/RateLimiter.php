@@ -14,38 +14,34 @@ declare(strict_types=1);
 namespace mindstellar\locationiq;
 
 use Closure;
+use mindstellar\security\RateLimit;
 
 /**
- * Keeps calls under a per-second cap by counting them in the key-value store, and waiting
- * for the next second when the cap is reached. Several workers share the count.
+ * Keeps calls under a per-second cap using core's shared counter, and waits for the next
+ * second when the cap is reached. Several workers share the count.
  */
 final class RateLimiter
 {
-    public const GROUP = 'locationiq';
+    public const CONTEXT = 'locationiq';
 
     /**
-     * @param Closure(string):int      $read   count stored under a key, 0 when none
-     * @param Closure(string,int):void $write  store a count that lives a few seconds
-     * @param Closure():float          $now    seconds, with fractions
-     * @param Closure(int):void        $sleep  wait this many microseconds
+     * @param Closure(int):?int $count one more call in this second (whole seconds); the count so far, null when unknown
+     * @param Closure():float   $now   seconds, with fractions
+     * @param Closure(int):void $sleep wait this many microseconds
      */
     public function __construct(
-        private Closure $read,
-        private Closure $write,
+        private Closure $count,
         private Closure $now,
         private Closure $sleep,
         private int $perSecond = 2
     ) {
     }
 
-    /** A limiter backed by the key-value store and the real clock. */
+    /** A limiter backed by core's counter and the real clock. */
     public static function forSite(int $perSecond = 2): self
     {
         return new self(
-            static fn (string $key): int => (int) osc_kv_get(self::GROUP, $key, 0),
-            static function (string $key, int $count): void {
-                osc_kv_set(self::GROUP, $key, $count, 5);
-            },
+            static fn (int $second): ?int => RateLimit::increment(self::CONTEXT, 'search', 1, true, $second),
             static fn (): float => microtime(true),
             static function (int $micros): void {
                 usleep($micros);
@@ -57,18 +53,15 @@ final class RateLimiter
     /** Take a slot, waiting for the next second if this one is full. */
     public function acquire(): void
     {
-        // Two waits at most: another worker may fill the next second before we get to it.
+        // Three tries at most: other workers may fill the next second before we get to it.
         for ($tries = 0; $tries < 3; $tries++) {
             $now = ($this->now)();
-            $key = 'rate:' . (int) floor($now);
-            $n   = ($this->read)($key);
-            if ($n < $this->perSecond) {
-                ($this->write)($key, $n + 1);
-
+            $n   = ($this->count)((int) floor($now));
+            // An unreachable counter allows the call, as core's own limiter does.
+            if ($n === null || $n <= $this->perSecond) {
                 return;
             }
-            $wait = (int) ceil((floor($now) + 1 - $now) * 1000000) + 1000;
-            ($this->sleep)($wait);
+            ($this->sleep)((int) ceil((floor($now) + 1 - $now) * 1000000) + 1000);
         }
     }
 }

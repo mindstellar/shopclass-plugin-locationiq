@@ -44,11 +44,11 @@ msgstr ""
 msgid "LocationIQ Geocoder needs Shopclass 7.0 or later and is switched off. Update Shopclass to use it."
 msgstr ""
 
-#: src/Plugin.php:67
+#: src/Plugin.php:73
 msgid "LocationIQ is chosen for address lookup but has no API key, so no address is looked up."
 msgstr ""
 
-#: src/Plugin.php:69
+#: src/Plugin.php:75
 msgid "LocationIQ settings"
 msgstr ""
 
@@ -69,7 +69,7 @@ msgid "The access token from your LocationIQ dashboard. It is never shown again;
 msgstr ""
 
 #: settings.php:53
-msgid "The free plan allows 2 requests a second and lets answers be stored for 48 hours; after that an address is looked up again. A paid plan lets answers be kept."
+msgid "The free plan allows 2 requests a second and lets answers be stored for 48 hours; after that an address is looked up again. A paid plan lets answers be kept, up to a year."
 msgstr ""
 
 #: settings.php:70

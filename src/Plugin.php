@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace mindstellar\locationiq;
 
+use mindstellar\http\CurlHttpClient;
 use mindstellar\location\GeocodeProviderRegistry;
-use mindstellar\locationiq\Http\CurlClient;
 
 /**
  * The wiring: the provider, its settings and the admin notice.
@@ -24,6 +24,9 @@ final class Plugin
     /** Settings page id, and the preference section its values live in. */
     public const PAGE = 'locationiq';
 
+    /** Core's preference naming the active provider. Spelled out so uninstall works on an older core. */
+    private const CORE_PREF = 'geocode_provider';
+
     /** Build the provider from the saved settings. */
     public static function provider(): LocationIqProvider
     {
@@ -31,7 +34,7 @@ final class Plugin
             (string) osc_get_preference('api_key', self::PAGE),
             (string) osc_get_preference('region', self::PAGE),
             (string) osc_get_preference('plan', self::PAGE),
-            new CurlClient(),
+            new CurlHttpClient(),
             RateLimiter::forSite()
         );
     }
@@ -47,23 +50,22 @@ final class Plugin
     {
     }
 
-    /** Remove the stored settings and the rate counters. */
+    /** Remove the stored settings. */
     public static function uninstall(): void
     {
         // Do not leave core pointing at a provider that is gone.
-        if ((string) osc_get_preference(GeocodeProviderRegistry::PREF) === LocationIqProvider::ID) {
-            osc_set_preference(GeocodeProviderRegistry::PREF, '');
+        if ((string) osc_get_preference(self::CORE_PREF) === LocationIqProvider::ID) {
+            osc_set_preference(self::CORE_PREF, '');
         }
         foreach (array('api_key', 'region', 'plan') as $name) {
             osc_delete_preference($name, self::PAGE);
         }
-        osc_kv_delete_group(RateLimiter::GROUP);
     }
 
     /** Warn the owner when this plugin is the chosen lookup but has no key. */
     public static function adminNotice(): void
     {
-        if ((string) osc_get_preference(GeocodeProviderRegistry::PREF) !== LocationIqProvider::ID
+        if ((string) osc_get_preference(self::CORE_PREF) !== LocationIqProvider::ID
             || (string) osc_get_preference('api_key', self::PAGE) !== '') {
             return;
         }

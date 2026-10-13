@@ -2,8 +2,16 @@
   "$schema": "../schema/package.schema.json",
   "slug": "locationiq",
   "type": "plugin",
-  "categories": ["maps"],
-  "tags": ["geocoding", "maps", "address", "locationiq", "distance-search"],
+  "categories": [
+    "integrations"
+  ],
+  "tags": [
+    "geocoding",
+    "maps",
+    "address",
+    "locationiq",
+    "distance-search"
+  ],
   "short_description": "Find the exact map position of a listing from its street address with LocationIQ, for distance search.",
   "icon": "assets/icon.svg",
   "license": "GPL-3.0-or-later",

@@ -5,17 +5,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-use mindstellar\locationiq\Http\HttpClient;
-use mindstellar\locationiq\Http\HttpException;
+use mindstellar\http\HttpClient;
+use mindstellar\http\HttpException;
 
 /** Answers from a script and records every URL. */
 final class FakeHttp implements HttpClient
 {
-    /** @var array<int,array{0:string,1:array}> */
-    public array $calls = array();
-
     /** @var string[] */
     public array $urls = array();
+
+    /** @var array<int,array<string,mixed>> */
+    public array $options = array();
 
     /** @var array<int,array{status:int,body:string}|HttpException> */
     private array $queue = array();
@@ -34,15 +34,15 @@ final class FakeHttp implements HttpClient
         return $this;
     }
 
-    public function get(string $endpoint, array $params): array
+    public function send(string $method, string $url, array $headers = [], ?string $body = null, array $options = []): array
     {
-        $this->calls[] = array($endpoint, $params);
-        $this->urls[] = $endpoint . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        $this->urls[]    = $url;
+        $this->options[] = $options;
         $next = array_shift($this->queue) ?? array('status' => 500, 'body' => '');
         if ($next instanceof HttpException) {
             throw $next;
         }
 
-        return $next;
+        return array('status' => $next['status'], 'headers' => array(), 'body' => $next['body']);
     }
 }

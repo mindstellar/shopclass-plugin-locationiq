@@ -53,10 +53,8 @@ pin('quiet when another provider is chosen', '', ob_get_clean());
 
 harness_section('uninstall');
 $GLOBALS['prefs']['locationiq'] = array('api_key' => 'k', 'region' => 'us1', 'plan' => 'free');
-$GLOBALS['kv']['locationiq']    = array('rate:1' => 1);
 Plugin::uninstall();
 pin('settings removed', array(), $GLOBALS['prefs']['locationiq']);
-check('counters removed', !isset($GLOBALS['kv']['locationiq']));
 
 harness_section('uninstall resets the chosen provider');
 $GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = LocationIqProvider::ID;
