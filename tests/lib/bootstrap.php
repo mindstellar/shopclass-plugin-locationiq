@@ -61,6 +61,10 @@ function osc_get_preference($name, $section = 'osclass')
 {
     return $GLOBALS['prefs'][$section][$name] ?? '';
 }
+function osc_set_preference($key, $value = '', $section = 'osclass', $type = 'STRING')
+{
+    $GLOBALS['prefs'][$section][$key] = $value;
+}
 function osc_delete_preference($name, $section = 'osclass')
 {
     unset($GLOBALS['prefs'][$section][$name]);

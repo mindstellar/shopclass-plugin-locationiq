@@ -19,8 +19,12 @@ namespace mindstellar\locationiq\Http;
 interface HttpClient
 {
     /**
+     * The client builds the URL, so the key in $params stays out of the caller's stack.
+     *
+     * @param array<string,string|int> $params query string values
+     *
      * @return array{status:int,body:string}
      * @throws HttpException when no response came back at all
      */
-    public function get(string $url): array;
+    public function get(string $endpoint, array $params): array;
 }

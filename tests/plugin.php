@@ -13,6 +13,7 @@ require __DIR__ . '/lib/bootstrap.php';
 
 use mindstellar\location\GeocodeProviderRegistry;
 use mindstellar\location\Geocoder;
+use mindstellar\locationiq\LocationIqProvider;
 use mindstellar\locationiq\Plugin;
 
 harness_section('registry');
@@ -56,6 +57,14 @@ $GLOBALS['kv']['locationiq']    = array('rate:1' => 1);
 Plugin::uninstall();
 pin('settings removed', array(), $GLOBALS['prefs']['locationiq']);
 check('counters removed', !isset($GLOBALS['kv']['locationiq']));
+
+harness_section('uninstall resets the chosen provider');
+$GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = LocationIqProvider::ID;
+Plugin::uninstall();
+pin('core no longer points at it', '', $GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF]);
+$GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = 'other';
+Plugin::uninstall();
+pin('another choice is left alone', 'other', $GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF]);
 
 harness_section('settings page declaration');
 $spec = require __DIR__ . '/../settings.php';

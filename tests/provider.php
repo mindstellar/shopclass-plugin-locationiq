@@ -94,4 +94,31 @@ foreach (array(401, 403, 429, 500, 418) as $status) {
     check("HTTP $status message has no key", !str_contains($msg, 'pk.abc123'), $msg);
 }
 
+harness_section('hardening');
+function caught(callable $fn): ?Throwable
+{
+    try {
+        $fn();
+    } catch (RuntimeException $e) {
+        return $e;
+    }
+
+    return null;
+}
+$e = caught(fn () => make((new FakeHttp())->fail('boom pk.abc123'))->geocode('x'));
+pin('the HTTP error is not chained', null, $e->getPrevious());
+check('no stack frame argument holds the key', !str_contains(json_encode(array_map(fn ($f) => $f['args'] ?? array(), $e->getTrace()), JSON_PARTIAL_OUTPUT_ON_ERROR), 'pk.abc123'));
+check('the trace text has no key', !str_contains($e->getTraceAsString(), 'pk.abc123'));
+$spy = new FakeHttp();
+$spy->answer(200, '[]');
+make($spy)->geocode('addr', 'IN');
+check('the client gets the endpoint apart from the key', !str_contains($spy->calls[0][0], 'pk.abc123') && str_starts_with($spy->calls[0][0], 'https://'));
+
+$buf = new mindstellar\locationiq\Http\BodyBuffer(10);
+pin('a chunk under the limit is taken', 6, $buf->append('abcdef'));
+pin('a chunk past the limit is refused', 0, $buf->append('ghijk'));
+pin('and flagged', true, $buf->overflowed());
+pin('the body keeps only what fit', 'abcdef', $buf->body());
+pin('a chunk to exactly the limit is taken', 4, (new mindstellar\locationiq\Http\BodyBuffer(4))->append('abcd'));
+
 exit(harness_result());

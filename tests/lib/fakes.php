@@ -11,6 +11,9 @@ use mindstellar\locationiq\Http\HttpException;
 /** Answers from a script and records every URL. */
 final class FakeHttp implements HttpClient
 {
+    /** @var array<int,array{0:string,1:array}> */
+    public array $calls = array();
+
     /** @var string[] */
     public array $urls = array();
 
@@ -31,9 +34,10 @@ final class FakeHttp implements HttpClient
         return $this;
     }
 
-    public function get(string $url): array
+    public function get(string $endpoint, array $params): array
     {
-        $this->urls[] = $url;
+        $this->calls[] = array($endpoint, $params);
+        $this->urls[] = $endpoint . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
         $next = array_shift($this->queue) ?? array('status' => 500, 'body' => '');
         if ($next instanceof HttpException) {
             throw $next;

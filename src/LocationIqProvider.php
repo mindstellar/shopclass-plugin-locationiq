@@ -74,8 +74,15 @@ final class LocationIqProvider implements GeocodeProvider
         return self::ATTRIBUTION;
     }
 
-    /** The request URL, key included. */
-    public function url(string $address, ?string $countryCode = null): string
+    public function endpoint(): string
+    {
+        return 'https://' . $this->region . '.locationiq.com/v1/search';
+    }
+
+    /**
+     * @return array<string,string|int>
+     */
+    public function params(string $address, ?string $countryCode = null): array
     {
         $query = array(
             'key'    => $this->apiKey,
@@ -87,7 +94,13 @@ final class LocationIqProvider implements GeocodeProvider
             $query['countrycodes'] = strtolower($countryCode);
         }
 
-        return 'https://' . $this->region . '.locationiq.com/v1/search?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        return $query;
+    }
+
+    /** The request URL, key included. For tests; the lookup itself never builds it here. */
+    public function url(string $address, ?string $countryCode = null): string
+    {
+        return $this->endpoint() . '?' . http_build_query($this->params($address, $countryCode), '', '&', PHP_QUERY_RFC3986);
     }
 
     public function geocode(string $address, ?string $countryCode = null): ?array
@@ -99,9 +112,9 @@ final class LocationIqProvider implements GeocodeProvider
         $this->limiter?->acquire();
 
         try {
-            $response = $this->http->get($this->url($address, $countryCode));
+            $response = $this->http->get($this->endpoint(), $this->params($address, $countryCode));
         } catch (HttpException $e) {
-            throw new RuntimeException($this->mask($e->getMessage()), 0, $e);
+            throw new RuntimeException($this->mask($e->getMessage()));
         }
 
         $status = $response['status'];

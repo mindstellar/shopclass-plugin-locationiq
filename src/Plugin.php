@@ -50,6 +50,10 @@ final class Plugin
     /** Remove the stored settings and the rate counters. */
     public static function uninstall(): void
     {
+        // Do not leave core pointing at a provider that is gone.
+        if ((string) osc_get_preference(GeocodeProviderRegistry::PREF) === LocationIqProvider::ID) {
+            osc_set_preference(GeocodeProviderRegistry::PREF, '');
+        }
         foreach (array('api_key', 'region', 'plan') as $name) {
             osc_delete_preference($name, self::PAGE);
         }
