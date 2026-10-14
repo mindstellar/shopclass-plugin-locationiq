@@ -116,7 +116,9 @@ final class LocationIqProvider implements GeocodeProvider
             throw new RuntimeException('LocationIQ refused the API key (HTTP ' . $status . ')');
         }
         if ($status === 429) {
-            throw new RuntimeException('LocationIQ rate limit reached (HTTP 429)');
+            // The body names the window: "Rate Limited Second", "Minute" or "Day".
+            $day = stripos($response['body'], 'day') !== false;
+            throw RateLimiter::limitReached('LocationIQ rate limit reached (HTTP 429)', $day ? RateLimiter::untilTomorrow(time()) : 60);
         }
         if ($status !== 200) {
             throw new RuntimeException('LocationIQ answered HTTP ' . $status);

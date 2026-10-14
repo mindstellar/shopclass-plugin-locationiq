@@ -34,9 +34,23 @@ queue worker makes it faster.
 | Free | 2 requests a second | 48 hours, as the free terms require |
 | Paid | per your plan | up to a year |
 
-The plugin waits for the next second when the free limit is reached. A rate limit (HTTP 429), a
-server error or a refused key makes the lookup fail, and Shopclass tries again later. An
-address LocationIQ cannot find is remembered for a day.
+The plugin waits for the next second when the free limit is reached. A server error or a refused
+key makes the lookup fail, and Shopclass tries again later. An address LocationIQ cannot find is
+remembered for a day.
+
+## Daily limit
+
+**Daily request limit** (default 5,000, the free plan's allowance; 0 is no limit) counts lookups
+from midnight UTC. When it is used up, or LocationIQ answers with a rate limit (HTTP 429), the
+lookups stay queued and run again once the limit renews: the next day for the daily limit, a
+minute later for the per-second and per-minute ones. Nobody waits for them on the site.
+The settings page shows how many listings wait, and when lookups go on.
+
+## Older listings
+
+Tick **Older listings** and save to look up every listing that has a street address and no map
+position yet. One background job works through them ten at a time, within the daily limit.
+It needs Shopclass 7.0.0 or later.
 
 ## Attribution
 

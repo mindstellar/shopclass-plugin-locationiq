@@ -7,4 +7,6 @@
 - Settings for API key, region (us1 or eu1) and plan (free or paid).
 - Free plan answers are kept 48 hours; paid plan answers are kept up to a year.
 - Calls stay under the free plan's 2 requests a second.
+- A daily request limit (5,000 by default); when it or LocationIQ's own limit is used up, lookups wait in the queue until it renews.
+- Look up older listings with a street address from the settings page, in the background.
 - Translation template in `languages/locationiq.pot`.

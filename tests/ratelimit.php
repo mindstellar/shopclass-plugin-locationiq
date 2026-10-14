@@ -16,6 +16,7 @@
 require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/ratelimit-stub.php';
 
+use mindstellar\location\GeocodeLimitReached;
 use mindstellar\locationiq\LocationIqProvider;
 use mindstellar\locationiq\RateLimiter;
 use mindstellar\security\RateLimit;
@@ -137,6 +138,66 @@ RateLimit::$force   = static fn (int $second): ?int => null;
 RateLimiter::forSite()->acquire();
 pin('an unreachable counter does not wait', 0, count($GLOBALS['usleeps']));
 
+harness_section('daily limit');
+$clock = 86400 * 20 + 3600.5;
+$slept = array();
+$day   = 0;
+$l     = new RateLimiter(static fn (int $s): int => 1, static fn (): float => $clock, static function (int $m): void {
+}, 2, 3, static function (int $now) use (&$day): int {
+    return ++$day;
+});
+$l->acquire();
+$l->acquire();
+$l->acquire();
+$stopped = null;
+try {
+    $l->acquire();
+} catch (RuntimeException $e) {
+    $stopped = $e;
+}
+check('the fourth request of a three-a-day limit is stopped', $stopped instanceof GeocodeLimitReached);
+pin('it waits until just after midnight UTC', 82800 + 60, $stopped?->retryAfter());
+pin('and notes when lookups go on, for the settings page', (int) floor($clock) + 82860, $GLOBALS['kv']['locationiq']['paused_until'] ?? null);
+$day = 0;
+$l   = new RateLimiter(static fn (int $s): int => 1, static fn (): float => $clock, static function (int $m): void {
+}, 2, 0, static function (int $now) use (&$day): int {
+    return ++$day;
+});
+$l->acquire();
+pin('0 is no limit, and nothing is counted', 0, $day);
+$l = new RateLimiter(static fn (int $s): int => 1, static fn (): float => $clock, static function (int $m): void {
+}, 2, 1, static fn (int $now): ?int => null);
+$l->acquire();
+$l->acquire();
+check('an unreachable day counter allows the call', true);
+
+harness_section('LocationIQ\'s own limit');
+$GLOBALS['kv'] = array();
+foreach (array('Rate Limited Second' => 60, 'Rate Limited Minute' => 60) as $body => $wait) {
+    $p = new LocationIqProvider('k', 'us1', 'free', (new FakeHttp())->answer(429, '{"error":"' . $body . '"}'));
+    try {
+        $p->geocode('a');
+        $e = null;
+    } catch (RuntimeException $e) {
+    }
+    pin($body . ' waits a minute', $wait, $e instanceof GeocodeLimitReached ? $e->retryAfter() : null);
+}
+$p = new LocationIqProvider('k', 'us1', 'free', (new FakeHttp())->answer(429, '{"error":"Rate Limited Day"}'));
+try {
+    $p->geocode('a');
+    $e = null;
+} catch (RuntimeException $e) {
+}
+check('Rate Limited Day waits until after midnight UTC', $e instanceof GeocodeLimitReached && $e->retryAfter() === RateLimiter::untilTomorrow(time()));
+
+harness_section('the daily limit setting');
+$GLOBALS['prefs']['locationiq'] = array();
+pin('defaults to the free plan\'s 5,000', 5000, mindstellar\locationiq\Plugin::dailyLimit());
+$GLOBALS['prefs']['locationiq'] = array('daily_limit' => '0');
+pin('0 stays 0', 0, mindstellar\locationiq\Plugin::dailyLimit());
+$GLOBALS['prefs']['locationiq'] = array('daily_limit' => '-4');
+pin('a negative number is no limit', 0, mindstellar\locationiq\Plugin::dailyLimit());
+
 harness_section('Plugin::provider() uses the site limiter');
 RateLimit::$force   = null;
 RateLimit::$calls   = array();
@@ -147,7 +208,7 @@ $prop     = new ReflectionProperty($provider, 'http');
 $prop->setAccessible(true);
 $prop->setValue($provider, $http);
 $provider->geocode('a');
-pin('the lookup moved the counter', 1, count(RateLimit::$calls));
+pin('the lookup counts the day, then the second', array('day', 'search'), array_column(RateLimit::$calls, 'key'));
 pin('and sent its request', 1, count($http->urls));
 
 exit(harness_result());

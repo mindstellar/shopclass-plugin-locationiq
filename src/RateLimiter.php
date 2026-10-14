@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace mindstellar\locationiq;
 
 use Closure;
+use mindstellar\location\GeocodeLimitReached;
 use mindstellar\security\RateLimit;
 
 /**
@@ -33,12 +34,14 @@ final class RateLimiter
         private Closure $count,
         private Closure $now,
         private Closure $sleep,
-        private int $perSecond = 2
+        private int $perSecond = 2,
+        private int $perDay = 0,
+        private ?Closure $countDay = null
     ) {
     }
 
     /** A limiter backed by core's counter and the real clock. */
-    public static function forSite(int $perSecond = 2): self
+    public static function forSite(int $perSecond = 2, int $perDay = 0): self
     {
         return new self(
             static fn (int $second): ?int => RateLimit::increment(self::CONTEXT, 'search', 1, true, $second),
@@ -46,13 +49,16 @@ final class RateLimiter
             static function (int $micros): void {
                 usleep($micros);
             },
-            $perSecond
+            $perSecond,
+            $perDay,
+            static fn (int $now): ?int => RateLimit::increment(self::CONTEXT, 'day', 86400, true, $now)
         );
     }
 
     /** Take a slot, waiting for the next second if this one is full. */
     public function acquire(): void
     {
+        $this->spendDay();
         // Three tries at most: other workers may fill the next second before we get to it.
         for ($tries = 0; $tries < 3; $tries++) {
             $now = ($this->now)();
@@ -63,5 +69,37 @@ final class RateLimiter
             }
             ($this->sleep)((int) ceil((floor($now) + 1 - $now) * 1000000) + 1000);
         }
+    }
+    /**
+     * Count one request against the daily allowance, which renews at midnight UTC.
+     *
+     * @throws \RuntimeException a GeocodeLimitReached on cores that have it, when the day is used up
+     */
+    private function spendDay(): void
+    {
+        if ($this->perDay <= 0 || $this->countDay === null) {
+            return;
+        }
+        $now = (int) floor(($this->now)());
+        $n   = ($this->countDay)($now);
+        if ($n !== null && $n > $this->perDay) {
+            throw self::limitReached('LocationIQ daily request limit reached', self::untilTomorrow($now), $now);
+        }
+    }
+
+    /** Seconds from $now to just after the next midnight UTC. */
+    public static function untilTomorrow(int $now): int
+    {
+        return 86400 - $now % 86400 + 60;
+    }
+
+    /** The "wait, then try again" signal; a plain failure on a core from before it. */
+    public static function limitReached(string $message, int $wait, ?int $now = null): \RuntimeException
+    {
+        if (function_exists('osc_kv_set')) {
+            osc_kv_set(self::CONTEXT, 'paused_until', ($now ?? time()) + $wait, $wait);
+        }
+
+        return class_exists(GeocodeLimitReached::class) ? new GeocodeLimitReached($message, $wait) : new \RuntimeException($message);
     }
 }

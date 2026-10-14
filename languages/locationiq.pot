@@ -8,35 +8,43 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: \n"
 
-#: settings.php:30
+#: settings.php:32
 msgid "API key"
 msgstr ""
 
-#: settings.php:25
+#: settings.php:27
 msgid "Account"
 msgstr ""
 
-#: settings.php:68
+#: settings.php:97
 msgid "Attribution"
 msgstr ""
 
-#: settings.php:63
+#: settings.php:92
 msgid "Credit"
 msgstr ""
 
-#: settings.php:45
+#: settings.php:70
+msgid "Daily request limit"
+msgstr ""
+
+#: settings.php:47
 msgid "Europe (eu1)"
 msgstr ""
 
-#: settings.php:22
+#: settings.php:23
 msgid "Finds the exact map position of a listing from its street address. Pick LocationIQ under Settings > General > Maps > Address lookup to use it."
 msgstr ""
 
-#: settings.php:55
+#: settings.php:57
 msgid "Free"
 msgstr ""
 
-#: settings.php:20
+#: src/Plugin.php:112
+msgid "Listings waiting for a map position: %d"
+msgstr ""
+
+#: settings.php:21
 msgid "LocationIQ Geocoder"
 msgstr ""
 
@@ -44,46 +52,82 @@ msgstr ""
 msgid "LocationIQ Geocoder needs Shopclass 7.0 or later and is switched off. Update Shopclass to use it."
 msgstr ""
 
-#: src/Plugin.php:73
+#: src/Plugin.php:85
 msgid "LocationIQ is chosen for address lookup but has no API key, so no address is looked up."
 msgstr ""
 
-#: src/Plugin.php:75
+#: src/Plugin.php:87
 msgid "LocationIQ settings"
 msgstr ""
 
-#: settings.php:56
+#: settings.php:85
+msgid "Look up every listing that has a street address and no map position yet. They are looked up in the background, within the daily limit."
+msgstr ""
+
+#: settings.php:65
+msgid "Lookups"
+msgstr ""
+
+#: settings.php:71
+msgid "Lookups a day, counted from midnight UTC; 0 is no limit. When it is used up, lookups wait until the next day. The free plan allows 5,000."
+msgstr ""
+
+#: settings.php:84
+msgid "Older listings"
+msgstr ""
+
+#: src/Plugin.php:100
+msgid "Older listings are being looked up in the background."
+msgstr ""
+
+#: src/Plugin.php:114
+msgid "Older listings are being looked up."
+msgstr ""
+
+#: settings.php:58
 msgid "Paid"
 msgstr ""
 
-#: settings.php:52
+#: src/Plugin.php:102
+msgid "Pick LocationIQ under Settings > General > Maps > Address lookup and save an API key first."
+msgstr ""
+
+#: settings.php:54
 msgid "Plan"
 msgstr ""
 
-#: settings.php:41
+#: settings.php:43
 msgid "Region"
 msgstr ""
 
-#: settings.php:31
+#: settings.php:78
+msgid "Status"
+msgstr ""
+
+#: settings.php:33
 msgid "The access token from your LocationIQ dashboard. It is never shown again; leave the box blank to keep the saved key."
 msgstr ""
 
-#: settings.php:53
+#: settings.php:55
 msgid "The free plan allows 2 requests a second and lets answers be stored for 48 hours; after that an address is looked up again. A paid plan lets answers be kept, up to a year."
 msgstr ""
 
-#: settings.php:70
+#: settings.php:99
 msgid "The free plan requires a visible link to LocationIQ wherever its data is shown. Print it in your theme with osc_geocode_attribution(); it reads:"
 msgstr ""
 
-#: settings.php:42
-msgid "The server your lookups go to. Pick the one nearer your site."
-msgstr ""
-
-#: settings.php:36
-msgid "This does not look like a LocationIQ key"
+#: src/Plugin.php:117
+msgid "The request limit is used up. Lookups go on at %s UTC."
 msgstr ""
 
 #: settings.php:44
+msgid "The server your lookups go to. Pick the one nearer your site."
+msgstr ""
+
+#: settings.php:38
+msgid "This does not look like a LocationIQ key"
+msgstr ""
+
+#: settings.php:46
 msgid "United States (us1)"
 msgstr ""
