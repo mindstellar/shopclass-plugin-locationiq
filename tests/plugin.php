@@ -81,6 +81,8 @@ check('a key with a space is rejected', ($names['api_key']['validate'])('a b') !
 pin('a normal key passes', null, ($names['api_key']['validate'])('pk.abc_123-X'));
 pin('free is the default plan', 'free', $names['plan']['default']);
 pin('us1 is the default region', 'us1', $names['region']['default']);
+pin('the daily limit defaults to 5,000', '5000', $names['daily_limit']['default']);
+check('a core with no way to queue older listings gets no status or older-listings box', !mindstellar\locationiq\Plugin::canQueueExisting() && !isset($names['lookup_status']) && !isset($names['queue_existing']));
 
 harness_section('lookup through core\'s Geocoder');
 $GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = 'locationiq';

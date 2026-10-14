@@ -16,15 +16,15 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
-#: settings.php:97
+#: settings.php:99
 msgid "Attribution"
 msgstr ""
 
-#: settings.php:92
+#: settings.php:94
 msgid "Credit"
 msgstr ""
 
-#: settings.php:70
+#: settings.php:71
 msgid "Daily request limit"
 msgstr ""
 
@@ -40,7 +40,7 @@ msgstr ""
 msgid "Free"
 msgstr ""
 
-#: src/Plugin.php:112
+#: src/Plugin.php:118
 msgid "Listings waiting for a map position: %d"
 msgstr ""
 
@@ -60,7 +60,7 @@ msgstr ""
 msgid "LocationIQ settings"
 msgstr ""
 
-#: settings.php:85
+#: settings.php:87
 msgid "Look up every listing that has a street address and no map position yet. They are looked up in the background, within the daily limit."
 msgstr ""
 
@@ -68,19 +68,19 @@ msgstr ""
 msgid "Lookups"
 msgstr ""
 
-#: settings.php:71
+#: settings.php:72
 msgid "Lookups a day, counted from midnight UTC; 0 is no limit. When it is used up, lookups wait until the next day. The free plan allows 5,000."
 msgstr ""
 
-#: settings.php:84
+#: settings.php:86
 msgid "Older listings"
 msgstr ""
 
-#: src/Plugin.php:100
+#: src/Plugin.php:106
 msgid "Older listings are being looked up in the background."
 msgstr ""
 
-#: src/Plugin.php:114
+#: src/Plugin.php:120
 msgid "Older listings are being looked up."
 msgstr ""
 
@@ -88,7 +88,7 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
-#: src/Plugin.php:102
+#: src/Plugin.php:108
 msgid "Pick LocationIQ under Settings > General > Maps > Address lookup and save an API key first."
 msgstr ""
 
@@ -100,7 +100,7 @@ msgstr ""
 msgid "Region"
 msgstr ""
 
-#: settings.php:78
+#: settings.php:80
 msgid "Status"
 msgstr ""
 
@@ -112,11 +112,11 @@ msgstr ""
 msgid "The free plan allows 2 requests a second and lets answers be stored for 48 hours; after that an address is looked up again. A paid plan lets answers be kept, up to a year."
 msgstr ""
 
-#: settings.php:99
+#: settings.php:101
 msgid "The free plan requires a visible link to LocationIQ wherever its data is shown. Print it in your theme with osc_geocode_attribution(); it reads:"
 msgstr ""
 
-#: src/Plugin.php:117
+#: src/Plugin.php:123
 msgid "The request limit is used up. Lookups go on at %s UTC."
 msgstr ""
 

@@ -86,6 +86,12 @@ final class Plugin
             . ' <a href="' . osc_esc_html(osc_settings_page_url(self::PAGE)) . '">'
             . osc_esc_html(__('LocationIQ settings', 'locationiq')) . '</a></div>';
     }
+    /** Whether core can queue older listings and report on them (7.0.0 and later). */
+    public static function canQueueExisting(): bool
+    {
+        return method_exists(ListingGeocode::class, 'queueExisting');
+    }
+
     /**
      * Queue the older listings when the owner ticked the box.
      *
@@ -93,7 +99,7 @@ final class Plugin
      */
     public static function afterSave(array $values): void
     {
-        if (empty($values['queue_existing'])) {
+        if (empty($values['queue_existing']) || !self::canQueueExisting()) {
             return;
         }
         if (ListingGeocode::queueExisting()) {

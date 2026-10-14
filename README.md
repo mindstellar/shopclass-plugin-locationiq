@@ -49,7 +49,7 @@ The settings page shows how many listings wait, and when lookups go on.
 ## Older listings
 
 Tick **Older listings** and save to look up every listing that has a street address and no map
-position yet. One background job works through them ten at a time, within the daily limit.
+position yet. One background job queues them 50 at a time, within the daily limit.
 It needs Shopclass 7.0.0 or later.
 
 ## Attribution

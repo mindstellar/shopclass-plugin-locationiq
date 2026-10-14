@@ -63,7 +63,8 @@ return array(
         ),
         array(
             'title'  => __('Lookups', 'locationiq'),
-            'fields' => array(
+            // Older cores have no way to queue older listings; those two fields stay away there.
+            'fields' => array_merge(array(
                 array(
                     'type'    => 'number',
                     'name'    => 'daily_limit',
@@ -72,6 +73,7 @@ return array(
                     'default' => (string) Plugin::DEFAULT_DAILY_LIMIT,
                     'attrs'   => array('min' => '0', 'step' => '1'),
                 ),
+            ), Plugin::canQueueExisting() ? array(
                 array(
                     'type'   => 'custom',
                     'name'   => 'lookup_status',
@@ -86,7 +88,7 @@ return array(
                     'persist'    => false,
                     'write_only' => true,
                 ),
-            ),
+            ) : array()),
         ),
         array(
             'title'  => __('Credit', 'locationiq'),
