@@ -16,7 +16,7 @@ an address is looked up.
 ## Setup
 
 1. Install and activate the plugin, then open **Plugins → LocationIQ Geocoder**.
-2. Paste your access token into *API key*, pick the *Region* and the *Plan*, and save.
+2. Paste your access token into *API key*, pick the *Region*, and save.
 3. Open **Settings → General → Maps** and choose *LocationIQ* under *Address lookup*.
 
 The saved key is never shown again. Leave the box blank to keep it.
