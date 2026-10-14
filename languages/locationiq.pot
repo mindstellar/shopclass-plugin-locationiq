@@ -16,15 +16,15 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
-#: settings.php:99
+#: settings.php:88
 msgid "Attribution"
 msgstr ""
 
-#: settings.php:94
+#: settings.php:83
 msgid "Credit"
 msgstr ""
 
-#: settings.php:71
+#: settings.php:60
 msgid "Daily request limit"
 msgstr ""
 
@@ -36,11 +36,7 @@ msgstr ""
 msgid "Finds the exact map position of a listing from its street address. Pick LocationIQ under Settings > General > Maps > Address lookup to use it."
 msgstr ""
 
-#: settings.php:57
-msgid "Free"
-msgstr ""
-
-#: src/Plugin.php:118
+#: src/Plugin.php:117
 msgid "Listings waiting for a map position: %d"
 msgstr ""
 
@@ -52,55 +48,47 @@ msgstr ""
 msgid "LocationIQ Geocoder needs Shopclass 7.0 or later and is switched off. Update Shopclass to use it."
 msgstr ""
 
-#: src/Plugin.php:85
+#: src/Plugin.php:84
 msgid "LocationIQ is chosen for address lookup but has no API key, so no address is looked up."
 msgstr ""
 
-#: src/Plugin.php:87
+#: src/Plugin.php:86
 msgid "LocationIQ settings"
 msgstr ""
 
-#: settings.php:87
+#: settings.php:76
 msgid "Look up every listing that has a street address and no map position yet. They are looked up in the background, within the daily limit."
 msgstr ""
 
-#: settings.php:65
+#: settings.php:54
 msgid "Lookups"
 msgstr ""
 
-#: settings.php:72
+#: settings.php:61
 msgid "Lookups a day, counted from midnight UTC; 0 is no limit. When it is used up, lookups wait until the next day. The free plan allows 5,000."
 msgstr ""
 
-#: settings.php:86
+#: settings.php:75
 msgid "Older listings"
 msgstr ""
 
-#: src/Plugin.php:106
+#: src/Plugin.php:105
 msgid "Older listings are being looked up in the background."
 msgstr ""
 
-#: src/Plugin.php:120
+#: src/Plugin.php:119
 msgid "Older listings are being looked up."
 msgstr ""
 
-#: settings.php:58
-msgid "Paid"
-msgstr ""
-
-#: src/Plugin.php:108
+#: src/Plugin.php:107
 msgid "Pick LocationIQ under Settings > General > Maps > Address lookup and save an API key first."
-msgstr ""
-
-#: settings.php:54
-msgid "Plan"
 msgstr ""
 
 #: settings.php:43
 msgid "Region"
 msgstr ""
 
-#: settings.php:80
+#: settings.php:69
 msgid "Status"
 msgstr ""
 
@@ -108,15 +96,11 @@ msgstr ""
 msgid "The access token from your LocationIQ dashboard. It is never shown again; leave the box blank to keep the saved key."
 msgstr ""
 
-#: settings.php:55
-msgid "The free plan allows 2 requests a second and lets answers be stored for 48 hours; after that an address is looked up again. A paid plan lets answers be kept, up to a year."
-msgstr ""
-
-#: settings.php:101
+#: settings.php:90
 msgid "The free plan requires a visible link to LocationIQ wherever its data is shown. Print it in your theme with osc_geocode_attribution(); it reads:"
 msgstr ""
 
-#: src/Plugin.php:123
+#: src/Plugin.php:122
 msgid "The request limit is used up. Lookups go on at %s UTC."
 msgstr ""
 

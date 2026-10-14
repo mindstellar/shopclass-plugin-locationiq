@@ -14,9 +14,9 @@ require __DIR__ . '/lib/bootstrap.php';
 use mindstellar\location\GeocodeProvider;
 use mindstellar\locationiq\LocationIqProvider;
 
-function make(FakeHttp $http, string $key = 'pk.abc123', string $region = 'us1', string $plan = 'free'): LocationIqProvider
+function make(FakeHttp $http, string $key = 'pk.abc123', string $region = 'us1'): LocationIqProvider
 {
-    return new LocationIqProvider($key, $region, $plan, $http);
+    return new LocationIqProvider($key, $region, $http);
 }
 
 function thrown(callable $fn): ?string
@@ -40,9 +40,7 @@ pin('not configured without a key', false, make(new FakeHttp(), '')->isConfigure
 pin('a blank key is not a key', false, make(new FakeHttp(), '   ')->isConfigured());
 
 harness_section('cache lifetime');
-pin('free plan keeps 48 hours', 172800, make(new FakeHttp(), 'k', 'us1', 'free')->cacheTtl());
-pin('paid plan sets no limit (core caps it at a year)', null, make(new FakeHttp(), 'k', 'us1', 'paid')->cacheTtl());
-pin('an unknown plan is treated as free', 172800, make(new FakeHttp(), 'k', 'us1', 'x')->cacheTtl());
+pin('answers are kept as long as core allows (a year)', null, make(new FakeHttp())->cacheTtl());
 
 harness_section('attribution');
 $a = $p->attribution();

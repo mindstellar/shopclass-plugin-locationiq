@@ -37,7 +37,6 @@ final class Plugin
         return new LocationIqProvider(
             (string) osc_get_preference('api_key', self::PAGE),
             (string) osc_get_preference('region', self::PAGE),
-            (string) osc_get_preference('plan', self::PAGE),
             new CurlHttpClient(),
             RateLimiter::forSite(2, self::dailyLimit())
         );
@@ -69,7 +68,7 @@ final class Plugin
         if ((string) osc_get_preference(self::CORE_PREF) === LocationIqProvider::ID) {
             osc_set_preference(self::CORE_PREF, '');
         }
-        foreach (array('api_key', 'region', 'plan', 'daily_limit') as $name) {
+        foreach (array('api_key', 'region', 'daily_limit') as $name) {
             osc_delete_preference($name, self::PAGE);
         }
     }

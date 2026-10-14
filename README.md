@@ -27,12 +27,10 @@ A lookup runs from the job queue after a listing with a street address is saved,
 visitor waits. Cron (or auto-cron) must be running; that is enough on shared hosting, and a
 queue worker makes it faster.
 
-## Plans
+## Limits
 
-| Plan | Limit | Answers are kept |
-|---|---|---|
-| Free | 2 requests a second | 48 hours, as the free terms require |
-| Paid | per your plan | up to a year |
+The free plan allows 2 requests a second and 5,000 a day. Answers are kept up to a year, so an
+address is looked up once.
 
 The plugin waits for the next second when the free limit is reached. A server error or a refused
 key makes the lookup fail, and Shopclass tries again later. An address LocationIQ cannot find is

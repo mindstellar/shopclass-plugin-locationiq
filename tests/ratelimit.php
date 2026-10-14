@@ -80,7 +80,7 @@ $http  = new FakeHttp();
 for ($i = 0; $i < 3; $i++) {
     $http->answer(200, '[{"lat":"1","lon":"2"}]');
 }
-$p = new LocationIqProvider('k', 'us1', 'free', $http, limiter($clock, $slept, $tally));
+$p = new LocationIqProvider('k', 'us1', $http, limiter($clock, $slept, $tally));
 $p->geocode('a');
 $p->geocode('b');
 pin('two lookups, no wait', 0, count($slept));
@@ -174,7 +174,7 @@ check('an unreachable day counter allows the call', true);
 harness_section('LocationIQ\'s own limit');
 $GLOBALS['kv'] = array();
 foreach (array('Rate Limited Second' => 60, 'Rate Limited Minute' => 60) as $body => $wait) {
-    $p = new LocationIqProvider('k', 'us1', 'free', (new FakeHttp())->answer(429, '{"error":"' . $body . '"}'));
+    $p = new LocationIqProvider('k', 'us1', (new FakeHttp())->answer(429, '{"error":"' . $body . '"}'));
     try {
         $p->geocode('a');
         $e = null;
@@ -182,7 +182,7 @@ foreach (array('Rate Limited Second' => 60, 'Rate Limited Minute' => 60) as $bod
     }
     pin($body . ' waits a minute', $wait, $e instanceof GeocodeLimitReached ? $e->retryAfter() : null);
 }
-$p = new LocationIqProvider('k', 'us1', 'free', (new FakeHttp())->answer(429, '{"error":"Rate Limited Day"}'));
+$p = new LocationIqProvider('k', 'us1', (new FakeHttp())->answer(429, '{"error":"Rate Limited Day"}'));
 try {
     $p->geocode('a');
     $e = null;
@@ -201,7 +201,7 @@ pin('a negative number is no limit', 0, mindstellar\locationiq\Plugin::dailyLimi
 harness_section('Plugin::provider() uses the site limiter');
 RateLimit::$force   = null;
 RateLimit::$calls   = array();
-$GLOBALS['prefs']['locationiq'] = array('api_key' => 'pk.test', 'region' => 'us1', 'plan' => 'free');
+$GLOBALS['prefs']['locationiq'] = array('api_key' => 'pk.test', 'region' => 'us1');
 $provider = mindstellar\locationiq\Plugin::provider();
 $http     = (new FakeHttp())->answer(200, '[{"lat":"1","lon":"2"}]');
 $prop     = new ReflectionProperty($provider, 'http');

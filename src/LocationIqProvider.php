@@ -27,11 +27,7 @@ final class LocationIqProvider implements GeocodeProvider
 
     public const REGIONS = array('us1', 'eu1');
 
-    public const PLAN_FREE = 'free';
-    public const PLAN_PAID = 'paid';
 
-    /** The free plan lets results be stored for 48 hours. */
-    public const FREE_TTL = 172800;
 
     public const ATTRIBUTION = '<a href="https://locationiq.com/" rel="noopener">Search by LocationIQ.com</a>';
 
@@ -44,7 +40,6 @@ final class LocationIqProvider implements GeocodeProvider
     public function __construct(
         string $apiKey,
         string $region,
-        private string $plan,
         private HttpClient $http,
         private ?RateLimiter $limiter = null
     ) {
@@ -69,7 +64,7 @@ final class LocationIqProvider implements GeocodeProvider
 
     public function cacheTtl(): ?int
     {
-        return $this->plan === self::PLAN_PAID ? null : self::FREE_TTL;
+        return null;
     }
 
     public function attribution(): string
