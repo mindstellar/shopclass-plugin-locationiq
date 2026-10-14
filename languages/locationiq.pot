@@ -93,7 +93,7 @@ msgid "Status"
 msgstr ""
 
 #: settings.php:33
-msgid "The access token from your LocationIQ dashboard. It is never shown again; leave the box blank to keep the saved key."
+msgid "The access token from your LocationIQ dashboard. A saved key shows as dots and is never printed; leave the box blank to keep it."
 msgstr ""
 
 #: settings.php:90

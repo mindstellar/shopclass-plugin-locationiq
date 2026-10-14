@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+### Fixed
+- The settings page shows when an API key is saved.
+
 ## 0.1.0
 
 ### New

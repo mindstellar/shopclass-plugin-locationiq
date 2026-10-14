@@ -73,7 +73,8 @@ foreach ($spec['groups'] as $group) {
 }
 check('has the key and region settings, and no plan', isset($names['api_key'], $names['region']) && !isset($names['plan']));
 pin('the key is a secret', 'secret', $names['api_key']['type']);
-pin('the key is write-only', true, $names['api_key']['write_only']);
+pin('a saved key is read back to show it is set', false, $names['api_key']['write_only']);
+pin('the key is never printed', true, $names['api_key']['masked']);
 pin('a blank box keeps the key', null, ($names['api_key']['persist'])('  '));
 pin('a new key is trimmed', 'pk.new', ($names['api_key']['persist'])(' pk.new '));
 check('a key with a space is rejected', ($names['api_key']['validate'])('a b') !== null);
