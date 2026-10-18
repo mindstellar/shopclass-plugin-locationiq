@@ -28,7 +28,7 @@ if (!defined('ABS_PATH')) {
 }
 
 spl_autoload_register(static function (string $class): void {
-    foreach (array('mindstellar\\location\\' => 'location', 'mindstellar\\base\\' => 'base', 'mindstellar\\http\\' => 'http', 'mindstellar\\search\\' => 'search') as $prefix => $dir) {
+    foreach (array('mindstellar\\location\\' => 'location', 'mindstellar\\base\\' => 'base', 'mindstellar\\http\\' => 'http', 'mindstellar\\search\\' => 'search', 'mindstellar\\container\\' => 'container') as $prefix => $dir) {
         $file = core_path() . '/oc-includes/osclass/classes/' . $dir . '/' . substr($class, strlen($prefix)) . '.php';
         if (strncmp($class, $prefix, strlen($prefix)) === 0 && is_file($file)) {
             require $file;
