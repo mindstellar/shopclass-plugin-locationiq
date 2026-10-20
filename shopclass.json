@@ -2,6 +2,7 @@
   "$schema": "../schema/package.schema.json",
   "slug": "locationiq",
   "type": "plugin",
+  "modes": ["classifieds", "shop"],
   "categories": [
     "integrations"
   ],
