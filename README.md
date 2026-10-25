@@ -1,6 +1,6 @@
 # LocationIQ Geocoder
 
-Finds the exact map position of a Shopclass listing from its street address, using
+Finds the exact map position of a listing from its street address, using
 [LocationIQ](https://locationiq.com/). Distance search then uses that point instead of the
 city or region centre.
 
@@ -10,64 +10,48 @@ city or region centre.
 - PHP 8.0 or later, with the curl extension
 - A LocationIQ access token (the free plan is enough to start)
 
-It works on shared hosting. Nothing runs on a normal page load; the plugin is built only when
-an address is looked up.
+## Install
 
-## Setup
+1. Open Plugins → Browse (or upload the zip from the GitHub release).
+2. Install.
+3. Activate.
 
-1. Install and activate the plugin, then open **Plugins → LocationIQ Geocoder**.
-2. Paste your access token into *API key*, pick the *Region*, and save.
-3. Open **Settings → General → Maps** and choose *LocationIQ* under *Address lookup*.
+## Set up
 
-The saved key is never shown again. Leave the box blank to keep it.
+1. Open Plugins → LocationIQ Geocoder.
+2. Paste your access token into *API key*, pick the *Region* (United States or Europe), and save.
+3. Optional: set *Daily request limit*. The default is 5,000, the free plan's allowance. 0 is no limit.
+4. Open Settings → General → Maps and choose LocationIQ under *Address lookup*.
 
-## When lookups run
+To look up listings saved before you installed the plugin, tick *Older listings* and save. One background job queues every listing that has a street address and no map position, 50 at a time, within the daily limit.
 
-A lookup runs from the job queue after a listing with a street address is saved, not while the
-visitor waits. Cron (or auto-cron) must be running; that is enough on shared hosting, and a
-queue worker makes it faster.
+## How it works
 
-## Limits
+- A lookup runs from the job queue after a listing with a street address is saved. Visitors do not wait for it.
+- Cron (or auto-cron) must be running. A queue worker makes it faster.
+- Nothing runs on a normal page load.
+- The settings page shows how many listings wait, and when lookups go on.
 
-The free plan allows 2 requests a second and 5,000 a day. Answers are kept up to a year, so an
-address is looked up once.
+## Notes / limits
 
-The plugin waits for the next second when the free limit is reached. A server error or a refused
-key makes the lookup fail, and Shopclass tries again later. An address LocationIQ cannot find is
-remembered for a day.
+- The saved key is never shown again. Leave the box blank to keep it.
+- The free plan allows 2 requests a second and 5,000 a day. The plugin waits for the next second when the limit is reached.
+- The daily limit counts from midnight UTC. When it is used up, or LocationIQ answers HTTP 429, lookups stay queued. They run again when the limit renews: the next day for the daily limit, a minute later for the others.
+- A server error or a refused key makes the lookup fail. Shopclass tries again later.
+- An address LocationIQ cannot find is remembered for a day. Found positions are kept up to a year.
+- *Older listings* needs Shopclass 7.0.0 or later.
+- The free plan requires a visible link to LocationIQ wherever its data is shown. Print it in your theme with `osc_geocode_attribution()`.
+- On uninstall, the settings are removed. If *Address lookup* named this plugin, it is reset to none.
+- Works on shared hosting.
 
-## Daily limit
+## For developers
 
-**Daily request limit** (default 5,000, the free plan's allowance; 0 is no limit) counts lookups
-from midnight UTC. When it is used up, or LocationIQ answers with a rate limit (HTTP 429), the
-lookups stay queued and run again once the limit renews: the next day for the daily limit, a
-minute later for the per-second and per-minute ones. Nobody waits for them on the site.
-The settings page shows how many listings wait, and when lookups go on.
+Run the tests with `./tests/run.sh`. They need no network. Core is read from `../osclass`, or from `SHOPCLASS_CORE`.
 
-## Older listings
+## Support
 
-Tick **Older listings** and save to look up every listing that has a street address and no map
-position yet. One background job queues them 50 at a time, within the daily limit.
-It needs Shopclass 7.0.0 or later.
-
-## Attribution
-
-The free plan requires a visible link to LocationIQ wherever its data is shown. Print it in
-your theme with `osc_geocode_attribution()`.
-
-## Uninstall
-
-The plugin's settings are removed. If *Address lookup* in Settings → General → Maps named this
-plugin, it is reset to none.
-
-## Tests
-
-```
-./tests/run.sh
-```
-
-They need no network. Core is read from `../osclass`, or from `SHOPCLASS_CORE`.
+https://github.com/mindstellar/shopclass-plugin-locationiq/issues
 
 ## License
 
-GPL-3.0-or-later.
+GPL-3.0-or-later
