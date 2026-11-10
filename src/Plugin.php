@@ -73,18 +73,57 @@ final class Plugin
         }
     }
 
+    /** Whether this plugin is the chosen lookup but has no key. */
+    public static function missingKey(): bool
+    {
+        return (string) osc_get_preference(self::CORE_PREF) === LocationIqProvider::ID
+            && (string) osc_get_preference('api_key', self::PAGE) === '';
+    }
+
+    /** Whether the admin is on this plugin's settings page. */
+    private static function onOwnPage(): bool
+    {
+        return \Params::getParam('page') === 'settings' && \Params::getParam('id') === self::PAGE;
+    }
+
     /** Warn the owner when this plugin is the chosen lookup but has no key. */
     public static function adminNotice(): void
     {
-        if ((string) osc_get_preference(self::CORE_PREF) !== LocationIqProvider::ID
-            || (string) osc_get_preference('api_key', self::PAGE) !== '') {
+        if (!self::missingKey()) {
+            return;
+        }
+        // With the notices API the bell carries it everywhere; the full text stays on the plugin's own page.
+        if (function_exists('osc_add_admin_notice') && !self::onOwnPage()) {
             return;
         }
         echo '<div class="flashmessage flashmessage-warning" role="status">'
-            . osc_esc_html(__('LocationIQ is chosen for address lookup but has no API key, so no address is looked up.', 'locationiq'))
+            . osc_esc_html(self::noKeyText())
             . ' <a href="' . osc_esc_html(osc_settings_page_url(self::PAGE)) . '">'
             . osc_esc_html(__('LocationIQ settings', 'locationiq')) . '</a></div>';
     }
+
+    /** The missing-key sentence. */
+    public static function noKeyText(): string
+    {
+        return __('LocationIQ is chosen for address lookup but has no API key, so no address is looked up.', 'locationiq');
+    }
+
+    /** Register the standing check in core's admin bell, when core has it. */
+    public static function registerNotice(): void
+    {
+        if (!function_exists('osc_add_admin_notice')) {
+            return;
+        }
+        osc_add_admin_notice('warning', array(self::class, 'noKeyText'), array(
+            'id'         => 'locationiq:no_key',
+            'when'       => array(self::class, 'missingKey'),
+            'menu'       => 'plugins',
+            'source'     => 'LocationIQ',
+            'link'       => osc_settings_page_url(self::PAGE),
+            'link_label' => static fn (): string => __('LocationIQ settings', 'locationiq'),
+        ));
+    }
+
     /** Whether core can queue older listings and report on them (7.0.0 and later). */
     public static function canQueueExisting(): bool
     {
