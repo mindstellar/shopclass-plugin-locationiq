@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+### Changed
+- On Shopclass 7.1 the missing-key warning goes to the admin bell; the full banner shows only on the settings page. Older cores keep the banner.
+
 ## 0.1.2
 
 ### Changed

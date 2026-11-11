@@ -73,55 +73,57 @@ final class Plugin
         }
     }
 
-    /** Whether this plugin is the chosen lookup but has no key. */
+    /** True when this plugin is the chosen lookup but has no key. */
     public static function missingKey(): bool
     {
         return (string) osc_get_preference(self::CORE_PREF) === LocationIqProvider::ID
             && (string) osc_get_preference('api_key', self::PAGE) === '';
     }
 
-    /** Whether the admin is on this plugin's settings page. */
-    private static function onOwnPage(): bool
-    {
-        return \Params::getParam('page') === 'settings' && \Params::getParam('id') === self::PAGE;
-    }
-
-    /** Warn the owner when this plugin is the chosen lookup but has no key. */
-    public static function adminNotice(): void
-    {
-        if (!self::missingKey()) {
-            return;
-        }
-        // With the notices API the bell carries it everywhere; the full text stays on the plugin's own page.
-        if (function_exists('osc_add_admin_notice') && !self::onOwnPage()) {
-            return;
-        }
-        echo '<div class="flashmessage flashmessage-warning" role="status">'
-            . osc_esc_html(self::noKeyText())
-            . ' <a href="' . osc_esc_html(osc_settings_page_url(self::PAGE)) . '">'
-            . osc_esc_html(__('LocationIQ settings', 'locationiq')) . '</a></div>';
-    }
-
-    /** The missing-key sentence. */
-    public static function noKeyText(): string
-    {
-        return __('LocationIQ is chosen for address lookup but has no API key, so no address is looked up.', 'locationiq');
-    }
-
-    /** Register the standing check in core's admin bell, when core has it. */
+    /** Add the standing warning to the admin bell. Needs a core that has osc_add_admin_notice(). */
     public static function registerNotice(): void
     {
         if (!function_exists('osc_add_admin_notice')) {
             return;
         }
-        osc_add_admin_notice('warning', array(self::class, 'noKeyText'), array(
+        osc_add_admin_notice('warning', static fn (): string => self::noticeText(), array(
             'id'         => 'locationiq:no_key',
-            'when'       => array(self::class, 'missingKey'),
             'menu'       => 'plugins',
             'source'     => 'LocationIQ',
             'link'       => osc_settings_page_url(self::PAGE),
-            'link_label' => static fn (): string => __('LocationIQ settings', 'locationiq'),
+            'link_label' => __('LocationIQ settings', 'locationiq'),
+            'when'       => array(self::class, 'missingKey'),
         ));
+    }
+
+    /**
+     * Banner on every admin page on an older core; with the notices API, only on this plugin's
+     * own settings page.
+     */
+    public static function adminNotice(): void
+    {
+        if (!self::missingKey()) {
+            return;
+        }
+        if (function_exists('osc_add_admin_notice') && !self::onOwnPage()) {
+            return;
+        }
+        echo '<div class="flashmessage flashmessage-warning" role="status">'
+            . osc_esc_html(self::noticeText())
+            . ' <a href="' . osc_esc_html(osc_settings_page_url(self::PAGE)) . '">'
+            . osc_esc_html(__('LocationIQ settings', 'locationiq')) . '</a></div>';
+    }
+
+    private static function noticeText(): string
+    {
+        return __('LocationIQ is chosen for address lookup but has no API key, so no address is looked up.', 'locationiq');
+    }
+
+    private static function onOwnPage(): bool
+    {
+        return \Params::getParam('page') === 'settings'
+            && \Params::getParam('action') === 'custom'
+            && \Params::getParam('id') === self::PAGE;
     }
 
     /** Whether core can queue older listings and report on them (7.0.0 and later). */
