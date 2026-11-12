@@ -3,7 +3,7 @@
 Plugin Name: LocationIQ Geocoder
 Plugin URI: https://github.com/mindstellar/shopclass-plugin-locationiq
 Description: Finds the exact map position of a listing from its street address with LocationIQ. Pick it in Settings > General > Maps > Address lookup.
-Version: 0.1.2
+Version: 0.1.3
 Author: Navjot Tomer (Mindstellar)
 Author URI: https://mindstellar.com
 Short Name: locationiq
@@ -63,4 +63,5 @@ osc_add_hook(osc_plugin_path(__FILE__) . '_configure', static function () {
 // Built only when something geocodes.
 osc_add_hook(GeocodeProviderRegistry::HOOK, array(Plugin::class, 'register'));
 
+Plugin::registerNotice();
 osc_add_hook('admin_page_header', array(Plugin::class, 'adminNotice'), 10);

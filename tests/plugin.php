@@ -50,6 +50,46 @@ ob_start();
 Plugin::adminNotice();
 pin('quiet when another provider is chosen', '', ob_get_clean());
 
+harness_section('notices API');
+class Params
+{
+    public static array $q = array();
+
+    public static function getParam($key)
+    {
+        return self::$q[$key] ?? '';
+    }
+}
+// Declared here so the earlier sections still run as an older core.
+if (true) {
+    function osc_add_admin_notice(string $type, $text, array $options = array()): void
+    {
+        $GLOBALS['notices'][] = array($type, $text, $options);
+    }
+}
+$GLOBALS['prefs']['osclass'][GeocodeProviderRegistry::PREF] = 'locationiq';
+$GLOBALS['prefs']['locationiq']['api_key'] = '';
+$GLOBALS['notices'] = array();
+Plugin::registerNotice();
+pin('one standing check', 1, count($GLOBALS['notices']));
+[$type, $text, $opts] = $GLOBALS['notices'][0];
+pin('a warning', 'warning', $type);
+pin('with the id', 'locationiq:no_key', $opts['id']);
+pin('the text is the sentence', 'LocationIQ is chosen for address lookup but has no API key, so no address is looked up.', $text());
+pin('on the plugins menu', 'plugins', $opts['menu']);
+pin('it fires with no key', true, $opts['when']());
+$GLOBALS['prefs']['locationiq']['api_key'] = 'pk.test';
+pin('it clears with a key', false, $opts['when']());
+$GLOBALS['prefs']['locationiq']['api_key'] = '';
+ob_start();
+Plugin::adminNotice();
+pin('no banner on other pages', '', ob_get_clean());
+Params::$q = array('page' => 'settings', 'action' => 'custom', 'id' => 'locationiq');
+ob_start();
+Plugin::adminNotice();
+check('full banner on its own page', str_contains(ob_get_clean(), 'no API key'));
+Params::$q = array();
+
 harness_section('uninstall');
 $GLOBALS['prefs']['locationiq'] = array('api_key' => 'k', 'region' => 'us1');
 Plugin::uninstall();
