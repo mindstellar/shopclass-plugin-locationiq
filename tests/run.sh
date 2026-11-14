@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Unit tests: no database, no network. They load core's geocode classes from
-# SHOPCLASS_CORE, or ../osclass.
+# SHOPCLASS_CORE, or ../shopclass.
 set -u
 cd "$(dirname "$0")/.."
 fail=0

@@ -35,7 +35,7 @@ function core_class_file(string $core, string $rel): string
 
 function core_path(): string
 {
-    $path = getenv('SHOPCLASS_CORE') ?: dirname(__DIR__, 3) . '/osclass';
+    $path = getenv('SHOPCLASS_CORE') ?: dirname(__DIR__, 3) . '/shopclass';
     if (!is_file(core_class_file($path, 'location/GeocodeProvider.php'))) {
         fwrite(STDERR, "Shopclass core not found at $path. Set SHOPCLASS_CORE to a checkout of 7.0 or later.\n");
         exit(2);
