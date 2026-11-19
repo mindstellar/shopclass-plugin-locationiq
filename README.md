@@ -18,7 +18,7 @@ city or region centre.
 
 ## Set up
 
-1. Open Plugins → LocationIQ Geocoder.
+1. Open Plugins → LocationIQ Geocoder → Settings (Plugins → LocationIQ Geocoder on Shopclass 7.0).
 2. Paste your access token into *API key*, pick the *Region* (United States or Europe), and save.
 3. Optional: set *Daily request limit*. The default is 5,000, the free plan's allowance. 0 is no limit.
 4. Open Settings → General → Maps and choose LocationIQ under *Address lookup*.
