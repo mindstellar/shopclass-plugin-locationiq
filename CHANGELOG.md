@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4
+
+### Changed
+- Admin pages are under Plugins → LocationIQ Geocoder.
+
 ## 0.1.3
 
 ### Changed
